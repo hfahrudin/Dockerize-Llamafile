@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  controller_service:
+    build:
+      context: ./controller  # Path to your agent service
+    ports:
+      - "8000:8000"
+    container_name: controller_service
+    networks:
+      - app-network  # Add the service to the network
+
+  llamafile_service:
+    build:
+      context: ./llamafile  # Path to your LLM backend service
+      args:
+        MODEL_URL: ${MODEL_URL}  # Fetch the model URL from the .env file
+        MODEL_NAME: ${MODEL_NAME}  # Fetch the model name from the .env file
+        MODEL_PORT: ${MODEL_PORT}  # Fetch the model port from the .env file
+        MODEL_THREADS: ${MODEL_THREADS}  # Fetch model threads from the .env file
+        MODEL_BATCH: ${MODEL_BATCH}  # Fetch model batch size from the .env file
+        MODEL_CONTEXT: ${MODEL_CONTEXT}  # Fetch model context from the .env file
+        MODEL_NUM_PROCESSORS: ${MODEL_NUM_PROCESSORS}  # Fetch model processors from the .env file
+    ports:
+      - "${MODEL_PORT}:${MODEL_PORT}"  # Use MODEL_PORT from .env for the container and host port
+    runtime: nvidia  # Specify the NVIDIA runtime for GPUs
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all  # Expose all GPUs
+      - MODEL_URL=${MODEL_URL}  # Pass model URL to the container via environment variable
+      - MODEL_NAME=${MODEL_NAME}  # Pass model name to the container via environment variable
+      - MODEL_PORT=${MODEL_PORT}  # Pass the port to the container
+      - MODEL_THREADS=${MODEL_THREADS}  # Pass the number of threads to the container
+      - MODEL_BATCH=${MODEL_BATCH}  # Pass the batch size to the container
+      - MODEL_CONTEXT=${MODEL_CONTEXT}  # Pass the context size to the container
+      - MODEL_NUM_PROCESSORS=${MODEL_NUM_PROCESSORS}  # Pass the number of processors to the container
+    networks:
+      - app-network  # Add the service to the network
+
+networks:
+  app-network:
+    driver: bridge  # Default network driver
