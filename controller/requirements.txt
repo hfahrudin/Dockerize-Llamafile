@@ -2,3 +2,5 @@ fastapi==0.95.2
 torch==2.1.0
 uvicorn==0.23.1
 requests
+numpy<2
+pybind11>=2.12
